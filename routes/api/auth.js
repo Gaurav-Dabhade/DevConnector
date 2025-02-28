@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
 // @route  GET api/auth
-//@desc    Test route
+//@desc    Get User data
 //access   Public
 
 router.get('/', auth, async (req, res) => {
