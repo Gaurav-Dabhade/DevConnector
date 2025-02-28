@@ -1,10 +1,11 @@
-// alertSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
+import { createSlice } from '@reduxjs/toolkit';
 
 // Initial state
 const initialState = {
-  alerts: [],
+  token: localStorage.getItem('token'),
+  isAuthenticated: null,
+  loading: true,
+  user: null,
 };
 
 // Async thunk for setting an alert with auto-removal
