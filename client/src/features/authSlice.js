@@ -1,56 +1,86 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { setAlert } from './alertSlice';
 
 // Initial state
 const initialState = {
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem('token') || null,
   isAuthenticated: null,
-  loading: true,
+  loading: false,
   user: null,
 };
 
-// Async thunk for setting an alert with auto-removal
-export const setAlert = createAsyncThunk(
-  'alert/setAlert',
-  async ({ msg, alertType, timeout = 5000 }, { dispatch }) => {
-    // Validate required parameters
-    if (!msg || !alertType) {
-      throw new Error('msg and alertType are required');
+// Create async thunk for registration
+export const register = createAsyncThunk(
+  'auth/register',
+  async ({ name, email, password }, { dispatch, rejectWithValue }) => {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const body = JSON.stringify({ name, email, password });
+
+    try {
+      const res = await axios.post('/api/users', body, config);
+      return res.data;
+    } catch (err) {
+      if (err.response && err.response.data) {
+        const { data } = err.response;
+        if (data.errors) {
+          data.errors.forEach((error) => {
+            dispatch(setAlert({ msg: error.msg, alertType: 'danger' }));
+          });
+        }
+        return rejectWithValue(data.msg || 'Registration failed');
+      } else if (err.message) {
+        dispatch(setAlert({ msg: err.message, alertType: 'danger' }));
+        return rejectWithValue(err.message);
+      } else {
+        dispatch(setAlert({ msg: 'Registration failed', alertType: 'danger' }));
+        return rejectWithValue('Registration failed');
+      }
     }
-
-    const id = uuidv4();
-
-    // Add the alert directly using our action
-    const alertData = { id, msg, alertType };
-    dispatch(addAlert(alertData));
-
-    // Set a timeout to automatically remove the alert
-    setTimeout(() => {
-      dispatch(removeAlert(id));
-    }, timeout);
-
-    // We don't need to return anything for the fulfilled state
-    // since we're already dispatching the addAlert action
-    return null;
   }
 );
 
-// Create the alert slice
-const alertSlice = createSlice({
-  name: 'alert',
+const authSlice = createSlice({
+  name: 'auth',
   initialState,
   reducers: {
-    addAlert: (state, action) => {
-      state.alerts.push(action.payload);
-    },
-    removeAlert: (state, action) => {
-      state.alerts = state.alerts.filter(
-        (alert) => alert.id !== action.payload
-      );
+    logout: (state) => {
+      localStorage.removeItem('token');
+      state.token = null;
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.user = null;
     },
   },
-  // No extraReducers needed since we're dispatching actions directly
+  extraReducers: (builder) => {
+    builder
+      // Register user cases
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        if (action.payload && action.payload.token) {
+          localStorage.setItem('token', action.payload.token);
+          state.token = action.payload.token;
+          state.isAuthenticated = true;
+          state.loading = false;
+          state.user = action.payload.user;
+        }
+      })
+      .addCase(register.rejected, (state, action) => {
+        localStorage.removeItem('token');
+        state.token = null;
+        state.isAuthenticated = false;
+        state.loading = false;
+        state.user = null;
+      });
+  },
 });
 
-// Export actions and reducer
-export const { addAlert, removeAlert } = alertSlice.actions;
-export default alertSlice.reducer;
+export const { logout } = authSlice.actions;
+export default authSlice.reducer;
