@@ -5,7 +5,7 @@ import setAuthToken from '../utils/setAuthToken';
 
 // Initial state
 const initialState = {
-  token: localStorage.getItem('token') || null,
+  token: localStorage.getItem('token'),
   isAuthenticated: null,
   loading: true,
   user: null,
@@ -40,9 +40,13 @@ export const register = createAsyncThunk(
 
     try {
       const res = await axios.post('/api/users', body, config);
-      if (res.data) {
-        dispatch(loadUser());
+
+      // Set token in localStorage here, before returning
+      if (res.data && res.data.token) {
+        localStorage.setItem('token', res.data.token);
       }
+      dispatch(loadUser());
+
       return res.data;
     } catch (err) {
       if (err.response && err.response.data) {
@@ -76,9 +80,13 @@ export const login = createAsyncThunk(
     const body = JSON.stringify({ email, password });
     try {
       const res = await axios.post('/api/auth', body, config);
-      if (res.data) {
-        dispatch(loadUser());
+
+      // Set token in localStorage here, before returning
+      if (res.data && res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        setAuthToken(res.data.token);
       }
+      dispatch(loadUser());
       return res.data;
     } catch (err) {
       if (err.response && err.response.data) {
@@ -111,9 +119,6 @@ const authSlice = createSlice({
       state.loading = false;
       state.user = null;
     },
-    // These are no longer needed as we use createAsyncThunk for login
-    // loginSuccess: (state, action) => {...},
-    // loginFailed: (state) => {...},
   },
   extraReducers: (builder) => {
     builder
@@ -122,8 +127,8 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(register.fulfilled, (state, action) => {
-        if (action.payload) {
-          localStorage.setItem('token', action.payload.token);
+        if (action.payload && action.payload.token) {
+          // Token is already set in localStorage in the thunk
           state.token = action.payload.token;
           state.isAuthenticated = true;
           state.loading = false;
@@ -137,13 +142,13 @@ const authSlice = createSlice({
         state.user = null;
       })
 
-      // Login user cases (new)
+      // Login user cases
       .addCase(login.pending, (state) => {
         state.loading = true;
       })
       .addCase(login.fulfilled, (state, action) => {
-        if (action.payload) {
-          localStorage.setItem('token', action.payload.token);
+        if (action.payload && action.payload.token) {
+          // Token is already set in localStorage in the thunk
           state.token = action.payload.token;
           state.isAuthenticated = true;
           state.loading = false;
@@ -158,6 +163,9 @@ const authSlice = createSlice({
       })
 
       // Load user cases
+      .addCase(loadUser.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(loadUser.fulfilled, (state, action) => {
         if (action.payload) {
           state.isAuthenticated = true;
