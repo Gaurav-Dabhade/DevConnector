@@ -38,7 +38,7 @@ const Register = () => {
     }
   };
   if (isAuthenticated) {
-    return <Navigate to='/' />;
+    return <Navigate to='/dashboard' />;
   }
 
   return (

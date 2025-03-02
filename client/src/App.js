@@ -9,8 +9,11 @@ import Register from './components/auth/Register';
 import Alert from './components/layout/Alert';
 import { loadUser } from './features/authSlice';
 import setAuthToken from './utils/setAuthToken';
+import Dashboard from './components/dashboard/Dashboard';
+import PrivateRoute from './components/routing/PrivateRoute';
 //Redux
 import { Provider } from 'react-redux';
+
 if (localStorage.token) {
   setAuthToken(localStorage.token);
 }
@@ -43,6 +46,16 @@ const App = () => {
                 <section className='container'>
                   <Alert />
                   <Login />
+                </section>
+              }
+            />
+            <Route
+              path='/dashboard'
+              element={
+                <section className='container'>
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
                 </section>
               }
             />
