@@ -1,9 +1,12 @@
-import React from 'react';
-import { Fragment, useState } from 'react';
-import { Link } from 'react-router-dom';
-// import axios from 'axios';
+import React, { Fragment, useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../../features/authSlice';
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -18,8 +21,12 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('success');
+    dispatch(login({ email, password }));
   };
+
+  if (isAuthenticated) {
+    return <Navigate to='/dashboard' />;
+  }
 
   return (
     <Fragment>
@@ -35,7 +42,6 @@ const Login = () => {
             name='email'
             value={email}
             onChange={handleChange}
-            required
           />
         </div>
         <div className='form-group'>
@@ -43,7 +49,6 @@ const Login = () => {
             type='password'
             placeholder='Password'
             name='password'
-            minLength='6'
             value={password}
             onChange={handleChange}
           />
@@ -56,6 +61,10 @@ const Login = () => {
       </p>
     </Fragment>
   );
+};
+
+Login.propTypes = {
+  login: PropTypes.func.isRequired,
 };
 
 export default Login;

@@ -1,12 +1,15 @@
 import React, { Fragment, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { Link, Navigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { setAlert } from '../../features/alertSlice';
 import { register } from '../../features/authSlice';
 import PropTypes from 'prop-types';
 
 const Register = () => {
   const dispatch = useDispatch();
+
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,6 +37,9 @@ const Register = () => {
       dispatch(register({ name, email, password }));
     }
   };
+  if (isAuthenticated) {
+    return <Navigate to='/dashboard' />;
+  }
 
   return (
     <Fragment>
