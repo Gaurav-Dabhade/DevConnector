@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { setAlert } from './alertSlice';
 
 // Initial state
 const initialState = {
@@ -21,6 +22,51 @@ export const getCurrentProfile = createAsyncThunk(
         msg: err.response.statusText,
         status: err.response.status,
       });
+    }
+  }
+);
+
+export const createProfile = createAsyncThunk(
+  'profile/createProfile',
+  async (
+    { formData, navigate, edit = false },
+    { dispatch, rejectWithValue }
+  ) => {
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      const body = JSON.stringify(formData);
+      const res = await axios.post('/api/profile', body, config);
+
+      dispatch(getCurrentProfile());
+      dispatch(
+        setAlert({
+          msg: edit ? 'Profile Updated' : 'Profile Created',
+          alertType: 'success',
+          timeout: 5000,
+        })
+      );
+
+      if (!edit) {
+        navigate('/dashboard');
+      }
+
+      return res.data;
+    } catch (error) {
+      const errors = error.response?.data?.errors;
+
+      if (errors) {
+        errors.forEach((error) => {
+          console.log('Dispatching alert for:', error.msg);
+          dispatch(setAlert({ msg: error.msg, alertType: 'danger' }));
+        });
+      }
+
+      return rejectWithValue(error.response?.data || 'Something went wrong');
     }
   }
 );
@@ -52,7 +98,13 @@ export const getGithubRepos = createAsyncThunk(
 const profileSlice = createSlice({
   name: 'profile',
   initialState,
-  reducers: {},
+  reducers: {
+    clearProfile: (state) => {
+      state.profile = null;
+      state.repos = [];
+      state.loading = false;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getCurrentProfile.pending, (state) => {
@@ -91,4 +143,5 @@ const profileSlice = createSlice({
   },
 });
 
+export const { clearProfile } = profileSlice.actions;
 export default profileSlice.reducer;

@@ -11,6 +11,7 @@ import { loadUser } from './features/authSlice';
 import setAuthToken from './utils/setAuthToken';
 import Dashboard from './components/dashboard/Dashboard';
 import PrivateRoute from './components/routing/PrivateRoute';
+import CreateProfile from './components/profile-forms/CreateProfile';
 //Redux
 import { Provider } from 'react-redux';
 
@@ -53,8 +54,20 @@ const App = () => {
               path='/dashboard'
               element={
                 <section className='container'>
+                  <Alert />
                   <PrivateRoute>
                     <Dashboard />
+                  </PrivateRoute>
+                </section>
+              }
+            />
+            <Route
+              path='/create-profile'
+              element={
+                <section className='container'>
+                  <Alert />
+                  <PrivateRoute>
+                    <CreateProfile />
                   </PrivateRoute>
                 </section>
               }
