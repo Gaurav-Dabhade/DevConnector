@@ -13,6 +13,7 @@ import Dashboard from './components/dashboard/Dashboard';
 import PrivateRoute from './components/routing/PrivateRoute';
 import AddExperience from './components/profile-forms/AddExperience';
 import AddEducation from './components/profile-forms/AddEducation';
+import Profiles from './components/profiles/Profiles';
 import CreateProfile from './components/profile-forms/CreateProfile';
 
 import EditProfile from './components/profile-forms/EditProfile';
@@ -51,6 +52,15 @@ const App = () => {
                 <section className='container'>
                   <Alert />
                   <Login />
+                </section>
+              }
+            />
+            <Route
+              path='/profiles'
+              element={
+                <section className='container'>
+                  <Alert />
+                  <Profiles />
                 </section>
               }
             />
