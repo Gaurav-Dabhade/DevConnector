@@ -1,10 +1,12 @@
-import React, { useState, Fragment } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, Fragment, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { createProfile } from '../../features/profileSlice';
+import { createProfile, getCurrentProfile } from '../../features/profileSlice';
 
-const CreateProfile = () => {
+const EditProfile = () => {
   const dispatch = useDispatch();
+  const { profile, loading } = useSelector((state) => state.profile);
+
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     company: '',
@@ -22,6 +24,35 @@ const CreateProfile = () => {
   });
 
   const [displaySocialInputs, toggleSocialInputs] = useState(false);
+
+  // Fetch profile data when component mounts
+  useEffect(() => {
+    dispatch(getCurrentProfile());
+  }, [dispatch]);
+
+  // Update form data when profile changes
+  useEffect(() => {
+    if (!loading && profile) {
+      setFormData({
+        company: !profile.company ? '' : profile.company,
+        website: !profile.website ? '' : profile.website,
+        location: !profile.location ? '' : profile.location,
+        status: !profile.status ? '' : profile.status,
+        skills: !profile.skills
+          ? ''
+          : Array.isArray(profile.skills)
+          ? profile.skills.join(',')
+          : profile.skills,
+        githubusername: !profile.githubusername ? '' : profile.githubusername,
+        bio: !profile.bio ? '' : profile.bio,
+        twitter: !profile.social?.twitter ? '' : profile.social.twitter,
+        facebook: !profile.social?.facebook ? '' : profile.social.facebook,
+        linkedin: !profile.social?.linkedin ? '' : profile.social.linkedin,
+        youtube: !profile.social?.youtube ? '' : profile.social.youtube,
+        instagram: !profile.social?.instagram ? '' : profile.social.instagram,
+      });
+    }
+  }, [loading, profile]);
 
   const {
     company,
@@ -45,12 +76,12 @@ const CreateProfile = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(createProfile({ formData, navigate }));
+    dispatch(createProfile({ formData, navigate, edit: true }));
   };
 
   return (
     <Fragment>
-      <h1 className='large text-primary'>Create Your Profile</h1>
+      <h1 className='large text-primary'>Edit Your Profile</h1>
       <p className='lead'>
         <i className='fas fa-user'></i> Let's get some information to make your
         profile stand out
@@ -214,7 +245,11 @@ const CreateProfile = () => {
           </Fragment>
         )}
 
-        <input type='submit' className='btn btn-primary my-1' />
+        <input
+          type='submit'
+          className='btn btn-primary my-1'
+          value='Save Changes'
+        />
         <Link className='btn btn-light my-1' to='/dashboard'>
           Go Back
         </Link>
@@ -223,4 +258,4 @@ const CreateProfile = () => {
   );
 };
 
-export default CreateProfile;
+export default EditProfile;

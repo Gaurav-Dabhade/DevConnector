@@ -11,7 +11,11 @@ import { loadUser } from './features/authSlice';
 import setAuthToken from './utils/setAuthToken';
 import Dashboard from './components/dashboard/Dashboard';
 import PrivateRoute from './components/routing/PrivateRoute';
+import AddExperience from './components/profile-forms/AddExperience';
+import AddEducation from './components/profile-forms/AddEducation';
 import CreateProfile from './components/profile-forms/CreateProfile';
+
+import EditProfile from './components/profile-forms/EditProfile';
 //Redux
 import { Provider } from 'react-redux';
 
@@ -68,6 +72,40 @@ const App = () => {
                   <Alert />
                   <PrivateRoute>
                     <CreateProfile />
+                  </PrivateRoute>
+                </section>
+              }
+            />
+            <Route
+              path='/edit-profile'
+              element={
+                <section className='container'>
+                  <Alert />
+                  <PrivateRoute>
+                    <EditProfile />
+                  </PrivateRoute>
+                </section>
+              }
+            />
+
+            <Route
+              path='/add-experience'
+              element={
+                <section className='container'>
+                  <Alert />
+                  <PrivateRoute>
+                    <AddExperience />
+                  </PrivateRoute>
+                </section>
+              }
+            />
+            <Route
+              path='/add-education'
+              element={
+                <section className='container'>
+                  <Alert />
+                  <PrivateRoute>
+                    <AddEducation />
                   </PrivateRoute>
                 </section>
               }
