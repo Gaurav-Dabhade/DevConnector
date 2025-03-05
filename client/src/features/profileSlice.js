@@ -207,6 +207,7 @@ export const deleteExperience = createAsyncThunk(
       dispatch(
         setAlert({
           msg: 'Experience Removed',
+          alertType: 'secondary',
           timeout: 5000,
         })
       );
@@ -235,7 +236,8 @@ export const deleteEducation = createAsyncThunk(
       dispatch(getCurrentProfile());
       dispatch(
         setAlert({
-          msg: 'Education Removed',
+          msg: 'Experience Removed',
+          alertType: 'secondary',
           timeout: 5000,
         })
       );

@@ -15,6 +15,7 @@ import AddExperience from './components/profile-forms/AddExperience';
 import AddEducation from './components/profile-forms/AddEducation';
 import Profiles from './components/profiles/Profiles';
 import CreateProfile from './components/profile-forms/CreateProfile';
+import Profile from './components/profile/Profile';
 
 import EditProfile from './components/profile-forms/EditProfile';
 //Redux
@@ -61,6 +62,15 @@ const App = () => {
                 <section className='container'>
                   <Alert />
                   <Profiles />
+                </section>
+              }
+            />
+            <Route
+              path='/profile/:id'
+              element={
+                <section className='container'>
+                  <Alert />
+                  <Profile />
                 </section>
               }
             />
