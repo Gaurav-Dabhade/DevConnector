@@ -106,6 +106,60 @@ export const deletePost = createAsyncThunk(
   }
 );
 
+//add Post
+
+//add Post - MODIFIED WITH DEBUGGING
+export const addPost = createAsyncThunk(
+  'post/addPost',
+  async (formData, { dispatch, rejectWithValue }) => {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    // Log the exact data being sent
+    console.log('Sending form data:', formData);
+
+    try {
+      // Ensure we're sending exactly what the API expects
+      const body = JSON.stringify(formData);
+      console.log('Stringified body:', body);
+
+      const res = await axios.post(`/api/posts`, body, config);
+      console.log('Server response:', res.data);
+
+      dispatch(
+        setAlert({
+          msg: 'Post Created',
+          alertType: 'success',
+          timeout: 5000,
+        })
+      );
+      return res.data;
+    } catch (err) {
+      console.error('Error details:', err.response?.data);
+
+      const errorMsg =
+        err.response?.data?.errors?.[0]?.msg ||
+        err.response?.statusText ||
+        'Error creating post';
+
+      dispatch(
+        setAlert({
+          msg: errorMsg,
+          alertType: 'danger',
+          timeout: 5000,
+        })
+      );
+
+      return rejectWithValue({
+        msg: errorMsg,
+        status: err.response?.status || 500,
+      });
+    }
+  }
+);
 export const postSlice = createSlice({
   name: 'post',
   initialState,
@@ -161,6 +215,14 @@ export const postSlice = createSlice({
       })
       .addCase(deletePost.rejected, (state, { payload }) => {
         state.error = payload;
+        state.loading = false;
+      })
+      .addCase(addPost.fulfilled, (state, action) => {
+        state.posts.unshift(action.payload);
+        state.loading = false;
+      })
+      .addCase(addPost.rejected, (state, action) => {
+        state.error = action.payload;
         state.loading = false;
       });
   },
