@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-// import { setAlert } from './alertSlice';
+import { setAlert } from './alertSlice';
 
 // Initial state
 const initialState = {
@@ -81,6 +81,31 @@ export const removeLike = createAsyncThunk(
   }
 );
 
+//Delete Post
+
+export const deletePost = createAsyncThunk(
+  'post/deletePost',
+  async (id, { dispatch, rejectWithValue }) => {
+    try {
+      await axios.delete(`/api/posts/${id}`);
+
+      dispatch(
+        setAlert({
+          msg: 'Post is Removed',
+          alertType: 'success',
+          timeout: 5000,
+        })
+      );
+      return { id };
+    } catch (err) {
+      return rejectWithValue({
+        msg: err.response.statusText,
+        status: err.response.status,
+      });
+    }
+  }
+);
+
 export const postSlice = createSlice({
   name: 'post',
   initialState,
@@ -125,6 +150,16 @@ export const postSlice = createSlice({
         state.loading = false;
       })
       .addCase(removeLike.rejected, (state, { payload }) => {
+        state.error = payload;
+        state.loading = false;
+      })
+      .addCase(deletePost.fulfilled, (state, action) => {
+        state.posts = state.posts.filter(
+          (post) => post._id !== action.payload.id
+        );
+        state.loading = false;
+      })
+      .addCase(deletePost.rejected, (state, { payload }) => {
         state.error = payload;
         state.loading = false;
       });

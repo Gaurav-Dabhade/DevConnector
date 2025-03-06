@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { format } from 'date-fns';
-import { addLike, removeLike } from '../../features/postSlice';
+import { addLike, removeLike, deletePost } from '../../features/postSlice';
 
 const PostItem = ({
   post: { _id, text, name, avatar, user, likes, comments, date },
@@ -60,7 +60,11 @@ const PostItem = ({
           )}
         </Link>
         {auth?.user?._id === user && (
-          <button type='button' className='btn btn-danger'>
+          <button
+            onClick={() => dispatch(deletePost(_id))}
+            type='button'
+            className='btn btn-danger'
+          >
             <i className='fas fa-times'></i>
           </button>
         )}
