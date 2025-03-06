@@ -343,6 +343,7 @@ const profileSlice = createSlice({
         state.repos = action.payload;
       })
       .addCase(getGithubRepos.rejected, (state, action) => {
+        state.repos = [];
         state.loading = false;
         state.error = action.payload;
       });
