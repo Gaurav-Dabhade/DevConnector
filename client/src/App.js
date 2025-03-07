@@ -17,6 +17,7 @@ import Profiles from './components/profiles/Profiles';
 import CreateProfile from './components/profile-forms/CreateProfile';
 import Profile from './components/profile/Profile';
 import Posts from './components/posts/Posts';
+import Post from './components/post/Post';
 
 import EditProfile from './components/profile-forms/EditProfile';
 //Redux
@@ -138,6 +139,17 @@ const App = () => {
                   <Alert />
                   <PrivateRoute>
                     <Posts />
+                  </PrivateRoute>
+                </section>
+              }
+            />
+            <Route
+              path='/post/:id'
+              element={
+                <section className='container'>
+                  <Alert />
+                  <PrivateRoute>
+                    <Post />
                   </PrivateRoute>
                 </section>
               }

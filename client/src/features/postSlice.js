@@ -8,6 +8,7 @@ const initialState = {
   post: null,
   loading: true,
   error: {},
+  commentStatus: 'idle',
 };
 
 export const getPosts = createAsyncThunk(
@@ -15,6 +16,21 @@ export const getPosts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(`/api/posts`);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue({
+        msg: err.response.statusText,
+        status: err.response.status,
+      });
+    }
+  }
+);
+
+export const getPost = createAsyncThunk(
+  'post/getPost',
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`/api/posts/${id}`);
       return res.data;
     } catch (err) {
       return rejectWithValue({
@@ -160,6 +176,84 @@ export const addPost = createAsyncThunk(
     }
   }
 );
+
+//add Comments -
+export const addComment = createAsyncThunk(
+  'post/addComment',
+  async ({ postId, formData }, { dispatch, rejectWithValue }) => {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    try {
+      const body = JSON.stringify(formData);
+      console.log('Stringified body:', body);
+
+      const res = await axios.post(
+        `/api/posts/comment/${postId}`,
+        body,
+        config
+      );
+
+      dispatch(
+        setAlert({
+          msg: 'Comment Added',
+          alertType: 'success',
+          timeout: 5000,
+        })
+      );
+      return res.data;
+    } catch (err) {
+      console.error('Error details:', err.response?.data);
+
+      const errorMsg =
+        err.response?.data?.errors?.[0]?.msg ||
+        err.response?.statusText ||
+        'Error creating post';
+
+      dispatch(
+        setAlert({
+          msg: errorMsg,
+          alertType: 'danger',
+          timeout: 5000,
+        })
+      );
+
+      return rejectWithValue({
+        msg: errorMsg,
+        status: err.response?.status || 500,
+      });
+    }
+  }
+);
+
+//Delete Post
+
+export const deleteComment = createAsyncThunk(
+  'post/deleteComment',
+  async ({ postId, commentId }, { dispatch, rejectWithValue }) => {
+    try {
+      await axios.delete(`/api/posts/comment/${postId}/${commentId}`);
+
+      dispatch(
+        setAlert({
+          msg: 'Comment is Removed',
+          alertType: 'success',
+          timeout: 5000,
+        })
+      );
+      return { commentId };
+    } catch (err) {
+      return rejectWithValue({
+        msg: err.response.statusText,
+        status: err.response.status,
+      });
+    }
+  }
+);
+
 export const postSlice = createSlice({
   name: 'post',
   initialState,
@@ -181,7 +275,14 @@ export const postSlice = createSlice({
         state.error = payload;
         state.loading = false;
       })
-
+      .addCase(getPost.fulfilled, (state, { payload }) => {
+        state.post = payload;
+        state.loading = false;
+      })
+      .addCase(getPost.rejected, (state, { payload }) => {
+        state.error = payload;
+        state.loading = false;
+      })
       .addCase(addLike.fulfilled, (state, action) => {
         state.posts = state.posts.map((post) =>
           post._id === action.payload.postId
@@ -222,6 +323,26 @@ export const postSlice = createSlice({
         state.loading = false;
       })
       .addCase(addPost.rejected, (state, action) => {
+        state.error = action.payload;
+        state.loading = false;
+      })
+      .addCase(addComment.fulfilled, (state, action) => {
+        state.post.comments.unshift(action.payload);
+        state.commentStatus = 'succeeded';
+        state.loading = false;
+      })
+      .addCase(addComment.rejected, (state, action) => {
+        state.commentStatus = 'failed';
+        state.error = action.payload;
+        state.loading = false;
+      })
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        state.post.comments = state.post.comments.filter(
+          (comment) => comment._id !== action.payload.commentId
+        );
+        state.loading = false;
+      })
+      .addCase(deleteComment.rejected, (state, action) => {
         state.error = action.payload;
         state.loading = false;
       });

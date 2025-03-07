@@ -169,8 +169,16 @@ router.post(
     }
 
     try {
+      // Log the ID to see what's being received
+      console.log('Post ID received:', req.params.id);
+
       const user = await User.findById(req.user.id).select('-password');
       const post = await Post.findById(req.params.id);
+
+      // Check if post exists
+      if (!post) {
+        return res.status(404).json({ msg: 'Post not found' });
+      }
 
       const newComment = {
         text: req.body.text,
@@ -184,8 +192,8 @@ router.post(
       await post.save();
       res.json(post.comments);
     } catch (error) {
-      console.log(error.message);
-      res.status(500).send('Server Error');
+      console.error('Error details:', error);
+      res.status(500).json({ msg: 'Server Error', error: error.message });
     }
   }
 );
