@@ -1,6 +1,0 @@
-{
-  "mongoURI": "mongodb+srv://gaurav123:gaurav123@cluster0.1zeq6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-  "jwtSecret": "mysecrettoken",
-  "githubClientId": "Ov23lidZkZMYyfWqKSx5",
-  "githubSecret": "ab5bcca7c2861fafa6f77ff362bb88af58866d3f"
-}
